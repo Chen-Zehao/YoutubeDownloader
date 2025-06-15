@@ -4,7 +4,19 @@ from pathlib import Path
 
 class Config:
     def __init__(self):
-        self.config_file = "settings.json"
+        # 创建应用程序数据目录
+        app_name = "YouTubeDownloader"
+        if os.name == 'nt':  # Windows
+            app_data_dir = os.path.join(os.environ.get('APPDATA', ''), app_name)
+        else:  # Linux/Mac
+            app_data_dir = os.path.join(os.path.expanduser("~"), f".{app_name}")
+        
+        # 确保目录存在
+        os.makedirs(app_data_dir, exist_ok=True)
+        
+        # 配置文件路径
+        self.config_file = os.path.join(app_data_dir, "settings.json")
+        
         self.default_settings = {
             "download_path": os.path.join(os.path.expanduser("~"), "Desktop"),
             "default_quality": "最佳质量(视频+音频)",
@@ -38,6 +50,8 @@ class Config:
     def save_settings(self):
         """保存配置文件"""
         try:
+            # 确保目录存在
+            os.makedirs(os.path.dirname(self.config_file), exist_ok=True)
             with open(self.config_file, 'w', encoding='utf-8') as f:
                 json.dump(self.settings, f, ensure_ascii=False, indent=2)
             return True
